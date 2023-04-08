@@ -37,7 +37,7 @@ class ArticleFormCreateView(View):
         if form.is_valid():  # Если данные корректные, то сохраняем данные формы
             form.save()
             messages.success(request, 'Article was added successfully')
-            return redirect('articles')  # Редирект на указанный маршрут
+            return redirect('article_index')  # Редирект на указанный маршрут
         messages.error(request, 'Failed to add article')
         # Если данные некорректные, то возвращаем человека обратно на страницу с заполненной формой
         return render(request, 'article/create.html', {'form': form})
@@ -61,10 +61,21 @@ class ArticleFormEditView(View):
         if form.is_valid():
             form.save()
             messages.success(request, 'Article was edited successfully')
-            return redirect('articles')
+            return redirect('article_index')
 
         messages.error(request, 'Failed to edit article')
         return render(request, 'article/update.html', {
             'form': form,
             'article_id': article_id,
         })
+
+
+class ArticleFormDeleteView(View):
+
+    def post(self, request, *args, **kwargs):
+        article_id = kwargs.get('id')
+        article = Article.objects.get(id=article_id)
+        if article:
+            messages.success(request, 'Article was deleted successfully')
+            article.delete()
+        return redirect('article_index')
