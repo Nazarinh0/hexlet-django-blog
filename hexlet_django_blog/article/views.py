@@ -34,22 +34,37 @@ class ArticleFormCreateView(View):
 
     def post(self, request, *args, **kwargs):
         form = ArticleForm(request.POST)
-        if form.is_valid(): # Если данные корректные, то сохраняем данные формы
+        if form.is_valid():  # Если данные корректные, то сохраняем данные формы
             form.save()
             messages.success(request, 'Article was added successfully')
-            return redirect('articles') # Редирект на указанный маршрут
+            return redirect('articles')  # Редирект на указанный маршрут
         messages.error(request, 'Failed to add article')
         # Если данные некорректные, то возвращаем человека обратно на страницу с заполненной формой
         return render(request, 'article/create.html', {'form': form})
 
 
-# class CommentArticleView(View):
-#
-#     def get(self, request, *args, **kwargs):
-#         form = CommentArticleForm(request.POST) # Создаем экземпляр нашей формы
-#         if form.is_valid():
-#             comment = Comment(
-#                 name - form.cleaned_data['content']
-#             )
-#
-#         return render(request, 'comment.html', {'form': form}) # Передаем форму в контексте
+class ArticleFormEditView(View):
+
+    def get(self, request, *args, **kwargs):
+        article_id = kwargs.get('id')
+        article = Article.objects.get(id=article_id)
+        form = ArticleForm(instance=article)
+        return render(request, 'article/update.html', {
+            'form': form,
+            'article_id': article_id,
+        })
+
+    def post(self, request, *args, **kwargs):
+        article_id = kwargs.get('id')
+        article = Article.objects.get(id=article_id)
+        form = ArticleForm(request.POST, instance=article)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Article was edited successfully')
+            return redirect('articles')
+
+        messages.error(request, 'Failed to edit article')
+        return render(request, 'article/update.html', {
+            'form': form,
+            'article_id': article_id,
+        })
